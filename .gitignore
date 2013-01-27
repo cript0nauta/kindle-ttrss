@@ -2,4 +2,6 @@
 .*.swp
 *~
 login
-out.html
+*.html
+*.pdf
+!template.html
