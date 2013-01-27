@@ -1,0 +1,5 @@
+*.py?
+.*.swp
+*~
+login
+out.html
