@@ -3,11 +3,21 @@
 
 from get import get, username, password
 from markdown import markdown
-import os
+import os, sys, pipes
+import getopt
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email.MIMEText import MIMEText
+from email import Encoders
 
-def convert(filename = 'out.html'):
-	""" Genera un archivo HTML con el resumen de los arículos sin leer """
+XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
+
+def convert(filename = 'out.html', verbose = False):
+	""" Genera un fichero HTML con el resumen de los arículos sin leer."""
+	if verbose: print 'Cargando template básico'
 	template = open('template.html').read().decode('utf-8')
+	if verbose: print 'Obteniendo artículos'
 	articulos = get()
 	html = ''
 	indice = ''
@@ -27,14 +37,83 @@ def convert(filename = 'out.html'):
 		indice += '<li>%s: %s (ART%s)</li>' % \
 				(art['feed'], art['titulo'], i)
 
-	# Escribimos en el archivo, teniendo el HTML básico en template.html
+	# Escribimos en el fichero, teniendo el HTML básico en template.html
+	if verbose: print 'Guardando HTML en', filename
 	write = template % dict(html=html, indice=indice)
 	arc = open(filename,'w')
 	arc.write(write.encode('utf-8'))
 	arc.close()
+	
+	# Convertimos el HTML a PDF
+	filename = pipes.quote(filename) # Evitamos Command Execution
+	pdf = pipes.quote(filename + '.pdf')
+	if verbose: print 'Guardando PDF en', pdf
+	os.system('%s "%s" "%s"' % (XHTML2HTTP_EXEC, filename, pdf))
 
-	os.system('chromium ' + filename)
+def mail(to, subject, text, attach):
+   msg = MIMEMultipart()
+
+   msg['From'] = username
+   msg['To'] = to
+   msg['Subject'] = subject
+
+   msg.attach(MIMEText(text))
+
+   part = MIMEBase('application', 'octet-stream')
+   part.set_payload(open(attach, 'rb').read())
+   Encoders.encode_base64(part)
+   part.add_header('Content-Disposition',
+           'attachment; filename="%s"' % os.path.basename(attach))
+   msg.attach(part)
+
+   mailServer = smtplib.SMTP("smtp.gmail.com", 587)
+   mailServer.ehlo()
+   mailServer.starttls()
+   mailServer.ehlo()
+   mailServer.login(username, password)
+   mailServer.sendmail(username, to, msg.as_string())
+   # Should be mailServer.quit(), but that crashes...
+   mailServer.close()
+
+def send(filename, verbose, kindlemail):
+	""" Enviamos el PDF a nuestro Kindle desde nuestro gmail """
+	if verbose: print 'Enviando a',kindlemail,'...',
+	mail(kindlemail, 'Convertir', '', filename)
+	if verbose: print 'Enviado'
+
+def uso():
+		print "Uso: python %s [opciones] [out]" % sys.argv[0]
+		print "Si no se especifica out el fichero de salida será out.html"
+		print "Opciones:"
+		print "\t-h | --help \t\t\t Muestra este diálogo"
+		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
+		print "\t-k <mail>| --kindle-email=mail \t El e-mail del Kindle" 
+		exit()
 
 if __name__ == '__main__':
-	convert()
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], 'hvk:m:', \
+				['help', 'verbose', 'kindle-email='])
+	except getopt.GetoptError:
+		uso()
+
+	verbose = True
+	filename = 'out.html'
+	kindlemail = None
+
+	for opt,val in opts:
+		if opt in ('-h','--help'):
+			uso()
+		elif opt in ('-v', '--verbose'):
+			verbose = True
+		elif opt in ('-k', '--kindle-email'):
+			kindlemail = val
+	
+	if kindlemail is None:
+		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
+		kindlemail = username.split('@')[0]
+		kindlemail += '@kindle.com'
+
+	convert(filename, verbose)
+	send(filename+'.pdf', verbose, kindlemail)
 
