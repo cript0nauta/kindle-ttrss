@@ -88,17 +88,19 @@ def uso():
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
 		print "\t-k <mail>| --kindle-email=mail \t El e-mail del Kindle" 
+		print "\t-g | --only-generate \t\t Solo genera el PDF, no lo envía"
 		exit()
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvk:m:', \
-				['help', 'verbose', 'kindle-email='])
+		opts, args = getopt.getopt(sys.argv[1:], 'hvk:m:g', \
+				['help', 'verbose', 'kindle-email=', 'only-generate'])
 	except getopt.GetoptError:
 		uso()
 
 	verbose = True
 	kindlemail = None
+	enviar = True
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
@@ -107,6 +109,8 @@ if __name__ == '__main__':
 			verbose = True
 		elif opt in ('-k', '--kindle-email'):
 			kindlemail = val
+		elif opt in ('-g', '--only-generate'):
+			enviar = False
 	
 	if kindlemail is None:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
@@ -119,5 +123,5 @@ if __name__ == '__main__':
 		filename = 'out.html'
 
 	convert(filename, verbose)
-	send(filename+'.pdf', verbose, kindlemail)
+	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
