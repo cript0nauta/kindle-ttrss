@@ -29,10 +29,10 @@ def convert(filename = 'out.html', verbose = False):
 		md += '#### Link: [%s](%s)\n' % (art['link'], art['link'])
 		md += '#### Feed: %s\n' % art['feed']
 		md += '#### Autor: %s\n' % art['autor']
-
 		md = markdown(md)
-		html += '<article id="art-%s">%s\n%s</article><hr />\n' % (i, md,
-				art['content'])
+		unread = "Para marcar como no leido, subrayar: __UNREAD__ART%s" % i
+		html += '<article id="art-%s">%s\n%s\n%s</article><hr />\n' % (i, md,
+				art['content'], unread)
 
 		indice += '<li>%s: %s (ART%s)</li>' % \
 				(art['feed'], art['titulo'], i)
