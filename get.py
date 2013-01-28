@@ -73,6 +73,7 @@ def get(text=0):
 		titulo = entry.getElementsByTagNameNS(ATOM_NS, u'title')[0].firstChild.data
 		feed = entry.getElementsByTagNameNS(ATOM_NS, u'title')[1].firstChild.data
 		link = entry.getElementsByTagName('id')[0].attributes['gr:original-id'].value
+		tag = entry.getElementsByTagName('id')[0].firstChild.data
 		if not link.startswith('http://'):
 			# Si el link es un tag de blogger, por ejemplo
 			link = entry.getElementsByTagName('link')[0].attributes['href'].value
@@ -88,6 +89,7 @@ def get(text=0):
 			print 'Feed', feed
 			print 'Link', link
 			print 'Autor', autor
+			print 'Tag', tag
 			print
 		else:
 			entries.append(dict(titulo=titulo,
@@ -95,7 +97,8 @@ def get(text=0):
 				link=link,
 				autor=autor,
 				content=content,
-				entry=entry
+				entry=entry,
+				tag=tag,
 				))
 
 	  if not text:
