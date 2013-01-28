@@ -98,7 +98,6 @@ if __name__ == '__main__':
 		uso()
 
 	verbose = True
-	filename = 'out.html'
 	kindlemail = None
 
 	for opt,val in opts:
@@ -113,6 +112,11 @@ if __name__ == '__main__':
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
 		kindlemail = username.split('@')[0]
 		kindlemail += '@kindle.com'
+
+	if len(args):
+		filename = args[0]
+	else:
+		filename = 'out.html'
 
 	convert(filename, verbose)
 	send(filename+'.pdf', verbose, kindlemail)
