@@ -7,8 +7,8 @@ try:
   import json
 except ImportError:
   import simplejson as json
-import urllib
-import urllib2
+import urllib, urllib2
+import libgreader
 
 username, password = open('login').read().split(':')
 
@@ -103,6 +103,14 @@ def get(text=0):
 
 	  if not text:
 			return entries
+
+def markRead(itemid):
+	""" Marca como leído un item """
+	auth = libgreader.ClientAuthMethod(username, password)
+	reader = libgreader.GoogleReader(auth)
+	feed = libgreader.items.SpecialFeed(reader, 'reading-list')
+	item = libgreader.items.Item(reader, dict(id=itemid), feed)
+	return item.markRead()
 
 if __name__ == '__main__':
 	get(1)
