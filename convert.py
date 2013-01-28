@@ -83,7 +83,7 @@ def send(filename, verbose, kindlemail):
 
 def uso():
 		print "Uso: python %s [opciones] [out]" % sys.argv[0]
-		print "Si no se especifica out el fichero de salida será out.html"
+		print "Si no se especifica out el nombre del fichero será (fecha).html"
 		print "Opciones:"
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
@@ -120,7 +120,8 @@ if __name__ == '__main__':
 	if len(args):
 		filename = args[0]
 	else:
-		filename = 'out.html'
+		filename = os.popen('date +%F').read()[:-1]
+		filename += '.html'
 
 	convert(filename, verbose)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
