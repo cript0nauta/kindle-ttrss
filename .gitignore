@@ -5,3 +5,5 @@ login
 *.html
 *.pdf
 !template.html
+db.json
+
