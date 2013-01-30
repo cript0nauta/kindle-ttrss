@@ -15,11 +15,11 @@ def uso():
 	print "\t-v\tMuestra información útil mientras corre"
 	exit()
 
-def main(kindledir, verbose = False):
+def main(filename, verbose = False):
 	""" A partir del archivo de recortes del Kindle, le informa a Google
 	Reader que los posts fueron leídos """
 
-	arc = open(CLIPPINGS).read()
+	arc = open(filename).read()
 	re_filename = r'(?P<filename>[0-9]{4}\-[0-9]{2}\-[0-9]{2}.html)'
 	re_artxx = r'(?P<artid>ART[0-9]+)'
 	re_underscore = r'__(?P<action>[^_]+)__%s?' % re_artxx
@@ -65,7 +65,7 @@ def main(kindledir, verbose = False):
 if __name__ == '__main__':
 	verbose = False
 	try:
-		opt, args = getopt.getopt(sys.argv[1:], 'v', [])
+		opts, args = getopt.getopt(sys.argv[1:], 'v', [])
 	except getopt.getoptError:
 		uso()
 
@@ -75,5 +75,8 @@ if __name__ == '__main__':
 
 	if not args:
 		uso()
-	main(args[0], verbose)
+
+	filename = args[0]+CLIPPINGS
+	if verbose: print 'Abriendo', filename
+	main(filename, verbose)
 
