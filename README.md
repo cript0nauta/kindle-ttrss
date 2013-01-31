@@ -2,9 +2,7 @@
 Google Reader en tu Kindle
 
 ## Dependencias
-[Markdown](http://pypi.python.org/pypi/Markdown)
-[Libgreader](https://github.com/askedrelic/libgreader)
-[xhtml2pdf](https://github.com/askedrelic/libgreader)
+[Markdown](http://pypi.python.org/pypi/Markdown), [Libgreader](https://github.com/askedrelic/libgreader), [xhtml2pdf](https://github.com/askedrelic/libgreader)
 
 ## Configuración
 ```
