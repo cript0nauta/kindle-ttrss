@@ -141,7 +141,7 @@ if __name__ == '__main__':
 	if len(args):
 		filename = args[0]
 	else:
-		filename = os.popen('date +%F').read()[:-1]
+		filename = os.popen('date "+%F %R"').read()[:-1]
 		filename += '.html'
 
 	convert(filename, verbose)
