@@ -20,7 +20,7 @@ def main(filename, verbose = False):
 	Reader que los posts fueron leídos """
 
 	arc = open(filename).read()
-	re_filename = r'(?P<filename>[0-9]{4}\-[0-9]{2}\-[0-9]{2}.html)'
+	re_filename = r'(?P<filename>[0-9]{4}\-[0-9]{2}\-[0-9]{2}\-[0-9]{2}\:[0-9]{2}.html)'
 	re_artxx = r'(?P<artid>ART[0-9]+)'
 	re_underscore = r'__(?P<action>[^_]+)__%s?' % re_artxx
 	re_entry = r'%s .+\n.+\n\r\n%s \r\n=+' % (re_filename, re_underscore)
