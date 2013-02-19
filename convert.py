@@ -15,7 +15,7 @@ import json
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
 JSON_DATABASE = 'db.json'
 
-def convert(filename = 'out.html', verbose = False):
+def convert(fecha, filename = 'out.html', verbose = False):
 	""" Genera un fichero HTML con el resumen de los arículos sin leer."""
 	if verbose: print 'Cargando template básico'
 	template = open('template.html').read().decode('utf-8')
@@ -60,7 +60,7 @@ def convert(filename = 'out.html', verbose = False):
 
 	# Escribimos en el fichero, teniendo el HTML básico en template.html
 	if verbose: print 'Guardando HTML en', filename
-	write = template % dict(html=html, indice=indice)
+	write = template % dict(html=html, indice=indice, fecha=fecha)
 	arc = open(filename,'w')
 	arc.write(write.encode('utf-8'))
 	arc.close()
@@ -138,12 +138,12 @@ if __name__ == '__main__':
 		kindlemail = username.split('@')[0]
 		kindlemail += '@kindle.com'
 
+	fecha = os.popen('date "+%F-%R"').read()[:-1]
 	if len(args):
 		filename = args[0]
 	else:
-		filename = os.popen('date "+%F-%R"').read()[:-1]
-		filename += '.html'
+		filename = fecha + '.html'
 
-	convert(filename, verbose)
+	convert(fecha, filename, verbose)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
