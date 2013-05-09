@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from get import get, username, password
+from get import get
 from markdown import markdown
 import os, sys, pipes
 import getopt
