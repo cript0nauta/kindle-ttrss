@@ -1,5 +1,6 @@
-# kindle-greader
+# kindle-ttrss
 Tiny Tiny RSS en tu Kindle
+
 Basado en [kindle-greader](https://github.com/sh4r3m4n/kindle-greader)
 
 ## Dependencias
