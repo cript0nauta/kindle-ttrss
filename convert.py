@@ -25,24 +25,7 @@ def convert(fecha, url, sid, filename = 'out.html', verbose = False):
 	html = ''
 	indice = ''
 
-	"""
-	# Abrimos o creamos el JSON que almacane el tag original de cada idart
-	try:
-		arc = open(JSON_DATABASE)
-	except IOError:
-		# Creamos la base de datos si no existe
-		if verbose: print 'El JSON no exite, creando'
-		json.dump({}, open(JSON_DATABASE, 'w'))
-		j = {}
-	else:
-		if verbose: print 'Json cargado correctamente'
-		j = json.load(arc)
-	key = dict()
-	"""
-
 	for art in articulos:
-		#art = articulos[i]
-		#key['ART%s'%i] = art['tag']
 		md = ""
 		md += '## [%s](%s)\n' % (art['title'], art['link'])
 		md += '#### Link: [%s](%s)\n' % (art['link'], art['link'])
@@ -56,13 +39,6 @@ def convert(fecha, url, sid, filename = 'out.html', verbose = False):
 
 		indice += '<li>%s: %s (ART%s)</li>' % \
 				(art['feed_title'], art['title'], i)
-
-	"""
-	# Escribimos en la base de datos
-	j[filename] = key
-	if verbose: print 'Escribiendo en JSON'
-	json.dump(j, open(JSON_DATABASE, 'w'))
-	"""
 
 	# Escribimos en el fichero, teniendo el HTML básico en template.html
 	if verbose: print 'Guardando HTML en', filename
