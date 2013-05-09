@@ -1,5 +1,6 @@
 # kindle-greader
-Google Reader en tu Kindle
+Tiny Tiny RSS en tu Kindle
+Basado en [kindle-greader](https://github.com/sh4r3m4n/kindle-greader)
 
 ## Dependencias
 [Markdown](http://pypi.python.org/pypi/Markdown), [Libgreader](https://github.com/askedrelic/libgreader), [xhtml2pdf](https://github.com/askedrelic/libgreader)
@@ -7,7 +8,7 @@ Google Reader en tu Kindle
 ## Configuración
 ```
 # Crear archivo con usuario y contraseña de Google
-echo "usuario@gmail.com:micontraseña" > login
+echo "usuario:contraseña" > login
 ```
 
 ## Enviar artículos por mail a nuestro Kindle
