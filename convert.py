@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from get import get
+from get import *
 from markdown import markdown
 import os, sys, pipes
 import getopt
@@ -11,19 +11,21 @@ from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email import Encoders
 import json
+from getpass import getpass
 
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
 JSON_DATABASE = 'db.json'
 
-def convert(fecha, filename = 'out.html', verbose = False):
+def convert(fecha, url, sid, filename = 'out.html', verbose = False):
 	""" Genera un fichero HTML con el resumen de los arículos sin leer."""
 	if verbose: print 'Cargando template básico'
 	template = open('template.html').read().decode('utf-8')
 	if verbose: print 'Obteniendo artículos'
-	articulos = get()
+	articulos = get(url, sid)
 	html = ''
 	indice = ''
 
+	"""
 	# Abrimos o creamos el JSON que almacane el tag original de cada idart
 	try:
 		arc = open(JSON_DATABASE)
@@ -36,27 +38,31 @@ def convert(fecha, filename = 'out.html', verbose = False):
 		if verbose: print 'Json cargado correctamente'
 		j = json.load(arc)
 	key = dict()
+	"""
 
-	for i in range(len(articulos)):
-		art = articulos[i]
-		key['ART%s'%i] = art['tag']
+	for art in articulos:
+		#art = articulos[i]
+		#key['ART%s'%i] = art['tag']
 		md = ""
-		md += '## [%s](%s) (ART%s)\n' % (art['titulo'], art['link'], i)
+		md += '## [%s](%s)\n' % (art['title'], art['link'])
 		md += '#### Link: [%s](%s)\n' % (art['link'], art['link'])
-		md += '#### Feed: %s\n' % art['feed']
-		md += '#### Autor: %s\n' % art['autor']
+		md += '#### Feed: %s\n' % art['feed_title']
+		md += '#### Autor: %s\n' % art['author']
 		md = markdown(md)
-		unread = "Para marcar como no leido, subrayar: __UNREAD__ART%s" % i
+		i = art['id']
+		unread = "Para marcar como no leido, subrayar: __UNREAD__%s" % i 
 		html += '<article id="art-%s">%s\n%s\n%s</article><hr />\n' % (i, md,
 				art['content'], unread)
 
 		indice += '<li>%s: %s (ART%s)</li>' % \
-				(art['feed'], art['titulo'], i)
+				(art['feed_title'], art['title'], i)
 
+	"""
 	# Escribimos en la base de datos
 	j[filename] = key
 	if verbose: print 'Escribiendo en JSON'
 	json.dump(j, open(JSON_DATABASE, 'w'))
+	"""
 
 	# Escribimos en el fichero, teniendo el HTML básico en template.html
 	if verbose: print 'Guardando HTML en', filename
@@ -133,7 +139,7 @@ if __name__ == '__main__':
 		elif opt in ('-g', '--only-generate'):
 			enviar = False
 	
-	if kindlemail is None:
+	if kindlemail is None and enviar:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
 		kindlemail = username.split('@')[0]
 		kindlemail += '@kindle.com'
@@ -144,6 +150,13 @@ if __name__ == '__main__':
 	else:
 		filename = fecha + '.html'
 
-	convert(fecha, filename, verbose)
+	url = "http://localhost/tt-rss/api/" #raw_input('URL: ')
+	user = raw_input('User: ')
+	password = getpass('Password: ')
+	sid = login(user, password, url)
+	if not sid:
+		print 'Login fallido'
+		exit()
+	convert(fecha, url, sid, filename, verbose)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
