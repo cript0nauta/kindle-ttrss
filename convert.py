@@ -47,6 +47,7 @@ def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 	arc.write(write.encode('utf-8'))
 	arc.close()
 	
+def genpdf(verbose, filename):
 	# Convertimos el HTML a PDF
 	filename = pipes.quote(filename) # Evitamos Command Execution
 	pdf = pipes.quote(filename + '.pdf')
@@ -91,18 +92,20 @@ def uso():
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
 		print "\t-m <mail>| --kindle-email=mail \t Se envía al e-mail del Kindle" 
+		print "\t-p | --pdf \t\t\t Genera un fichero resultante en PDF"
 		exit()
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvm:', \
-				['help', 'verbose', 'kindle-email=', 'only-generate'])
+		opts, args = getopt.getopt(sys.argv[1:], 'hvm:p', \
+				['help', 'verbose', 'kindle-email=', 'only-generate', 'pdf'])
 	except getopt.GetoptError:
 		uso()
 
 	verbose = True
 	kindlemail = None
 	enviar = False
+	pdf = False
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
@@ -112,6 +115,8 @@ if __name__ == '__main__':
 		elif opt in ('-m', '--kindle-email'):
 			enviar = True
 			kindlemail = val
+		elif opt in ('-p', '--pdf'):
+			pdf = True
 	
 	if kindlemail is None and enviar:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
@@ -132,5 +137,6 @@ if __name__ == '__main__':
 		print 'Login fallido'
 		exit()
 	genhtml(fecha, url, sid, filename, verbose)
+	if pdf: genpdf(verbose, filename)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
