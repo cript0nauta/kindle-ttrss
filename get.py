@@ -19,6 +19,15 @@ def login(user, password, url):
 		return False
 	return j['content']['session_id']
 
+def logout(url, sid):
+	""" Cierra la sesión especificada. Retorna True si no hay error """
+	j = dict(op='logout', sid=sid)
+	j = json.dumps(j)
+	page = urllib.urlopen(url,j).read()
+	ret = json.loads(page)
+	if not ret['status']:
+		return True
+
 def get(url, sid):
 	""" Obtiene los elementos sin leer en Tiny Tiny RSS"""
 	j = json.dumps(dict(sid=sid,op='getHeadlines', #obtiene artículos

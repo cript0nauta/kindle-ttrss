@@ -14,7 +14,7 @@ import json
 from getpass import getpass
 
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
-JSON_DATABASE = 'db.json'
+LOGIN_FILE = 'login'
 
 def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 	""" Genera un fichero HTML con el resumen de los arículos sin leer."""
@@ -91,14 +91,17 @@ def uso():
 		print "Opciones:"
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
-		print "\t-m <mail>| --kindle-email=mail \t Se envía al e-mail del Kindle" 
+		print "\t-m <mail>| --kindle-email=mail \t Se envía al mail del Kindle" 
 		print "\t-p | --pdf \t\t\t Genera un fichero resultante en PDF"
+		print "\t-r | --remember \t\t Mantener sesión iniciada"
+		print "\t --logout \t\t\t Cerrar la sesión iniciada con -r"
 		exit()
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvm:p', \
-				['help', 'verbose', 'kindle-email=', 'only-generate', 'pdf'])
+		opts, args = getopt.getopt(sys.argv[1:], 'hvm:pr', \
+				['help', 'verbose', 'kindle-email=', 'only-generate', 'pdf',
+				'remember', 'logout'])
 	except getopt.GetoptError:
 		uso()
 
@@ -106,6 +109,7 @@ if __name__ == '__main__':
 	kindlemail = None
 	enviar = False
 	pdf = False
+	remember = False
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
@@ -117,6 +121,8 @@ if __name__ == '__main__':
 			kindlemail = val
 		elif opt in ('-p', '--pdf'):
 			pdf = True
+		elif opt in ('-r', '--remember'):
+			remember = True
 	
 	if kindlemail is None and enviar:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
@@ -129,14 +135,39 @@ if __name__ == '__main__':
 	else:
 		filename = fecha + '.html'
 
-	url = "http://localhost/tt-rss/api/" #raw_input('URL: ')
-	user = raw_input('User: ')
-	password = getpass('Password: ')
-	sid = login(user, password, url)
-	if not sid:
-		print 'Login fallido'
+	try:
+		f = open(LOGIN_FILE)
+	except IOError:
+		# No usamos la opción de mantener sesión iniciada
+		url = raw_input('URL: ')
+		user = raw_input('User: ')
+		password = getpass('Password: ')
+		sid = login(user, password, url)
+		print sid
+		if not sid:
+			print 'Login fallido'
+			exit()
+	else:
+		content = f.read()
+		sid, url = content.split(';', 1)
+		f.close()
+
+	if remember:
+		# Creamos un fichero con los datos de la sesión
+		f = open(LOGIN_FILE, 'w')
+		f.write(';'.join([sid,url]))
+		f.close()
+
+	if ('--logout','') in opts:
+		# Si indicamos la opción logout
+		if logout(url, sid):
+			os.unlink(LOGIN_FILE) # Borramos el fichero
+		else:
+			print "Error cerrando sesión. Saliendo"
 		exit()
+
 	genhtml(fecha, url, sid, filename, verbose)
+
 	if pdf: genpdf(verbose, filename)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
