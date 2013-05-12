@@ -16,7 +16,7 @@ from getpass import getpass
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
 JSON_DATABASE = 'db.json'
 
-def convert(fecha, url, sid, filename = 'out.html', verbose = False):
+def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 	""" Genera un fichero HTML con el resumen de los arículos sin leer."""
 	if verbose: print 'Cargando template básico'
 	template = open('template.html').read().decode('utf-8')
@@ -90,30 +90,28 @@ def uso():
 		print "Opciones:"
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
-		print "\t-k <mail>| --kindle-email=mail \t El e-mail del Kindle" 
-		print "\t-g | --only-generate \t\t Solo genera el PDF, no lo envía"
+		print "\t-m <mail>| --kindle-email=mail \t Se envía al e-mail del Kindle" 
 		exit()
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvk:m:g', \
+		opts, args = getopt.getopt(sys.argv[1:], 'hvm:', \
 				['help', 'verbose', 'kindle-email=', 'only-generate'])
 	except getopt.GetoptError:
 		uso()
 
 	verbose = True
 	kindlemail = None
-	enviar = True
+	enviar = False
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
 			uso()
 		elif opt in ('-v', '--verbose'):
 			verbose = True
-		elif opt in ('-k', '--kindle-email'):
+		elif opt in ('-m', '--kindle-email'):
+			enviar = True
 			kindlemail = val
-		elif opt in ('-g', '--only-generate'):
-			enviar = False
 	
 	if kindlemail is None and enviar:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
@@ -133,6 +131,6 @@ if __name__ == '__main__':
 	if not sid:
 		print 'Login fallido'
 		exit()
-	convert(fecha, url, sid, filename, verbose)
+	genhtml(fecha, url, sid, filename, verbose)
 	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
