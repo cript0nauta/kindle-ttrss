@@ -23,6 +23,9 @@ def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 	template = open('template.html').read().decode('utf-8')
 	if verbose: print 'Obteniendo artículos'
 	articulos = get(url, sid)
+	if articulos == False:
+		print 'Login fallido'
+		exit()
 	html = ''
 	indice = ''
 
