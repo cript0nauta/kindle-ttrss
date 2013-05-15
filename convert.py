@@ -12,6 +12,7 @@ from email.MIMEText import MIMEText
 from email import Encoders
 import json
 from getpass import getpass
+import random
 
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
 LOGIN_FILE = 'login'
@@ -42,10 +43,20 @@ def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 
 	# Escribimos en el fichero, teniendo el HTML básico en template.html
 	if verbose: print 'Guardando HTML en', filename
-	write = template % dict(html=html, indice=indice, fecha=fecha)
+	document_code = random.randint(0,99999999) # Identificador único
+	write = template % dict(html=html, indice=indice, fecha=fecha, 
+			readall = '__READALL__%s'%document_code)
 	arc = open(filename,'w')
 	arc.write(write.encode('utf-8'))
 	arc.close()
+
+	# Guardamos la lista de artículos del documento
+	database = 'db_%s' % document_code
+	if verbose: print 'Guardando base de datos en', database
+	f = open(database, 'w')
+	f.write(','.join([str(art['id']) for art in \
+			articulos])) # IDs separados por coma
+	f.close()
 	
 def genpdf(verbose, filename):
 	# Convertimos el HTML a PDF
@@ -137,13 +148,13 @@ if __name__ == '__main__':
 
 	try:
 		f = open(LOGIN_FILE)
+		if remember: raise IOError # Si uso --remember siempre nos pide login
 	except IOError:
 		# No usamos la opción de mantener sesión iniciada
 		url = raw_input('URL: ')
 		user = raw_input('User: ')
 		password = getpass('Password: ')
 		sid = login(user, password, url)
-		print sid
 		if not sid:
 			print 'Login fallido'
 			exit()

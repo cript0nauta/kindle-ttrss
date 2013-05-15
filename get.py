@@ -40,7 +40,24 @@ def get(url, sid):
 		return False
 	return j['content']
 
-def markRead(itemid):
-	""" Marca como leído un item """
-	pass
+def update(url, sid, unread, *articles):
+	""" Marca como leídos o no leídos los items indicados """
+	if isinstance(articles[0], str):
+		# Le pasamos los datos en crudo desde la base de datos
+		article_ids = articles[0]
+	else:
+		article_ids = ','.join([str(e) for e in articles])
+	j = json.dumps(dict(op='updateArticle',
+		article_ids = article_ids,
+		sid = sid,
+		mode = 1 if unread else 0,
+		field = 2, #unread
+		))
+	page = urllib.urlopen(url, j).read()
+	j = json.loads(page)
+	if j['status'] == 1:
+		#Error
+		print j
+		raise ValueError
+
 

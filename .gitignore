@@ -6,4 +6,4 @@ login
 *.pdf
 !template.html
 db.json
-
+db_*
