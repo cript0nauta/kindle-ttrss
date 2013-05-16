@@ -40,15 +40,12 @@ def get(url, sid):
 		return False
 	return j['content']
 
-def update(url, sid, unread, *articles):
-	""" Marca como leídos o no leídos los items indicados """
-	if isinstance(articles[0], str):
-		# Le pasamos los datos en crudo desde la base de datos
-		article_ids = articles[0]
-	else:
-		article_ids = ','.join([str(e) for e in articles])
+def update(url, sid, unread, articles):
+	""" Marca como leídos o no leídos los items indicados. articles 
+	debe ser una cadena de texto conteniendo los IDs de cada artículo
+	separados por coma"""
 	j = json.dumps(dict(op='updateArticle',
-		article_ids = article_ids,
+		article_ids = articles,
 		sid = sid,
 		mode = 1 if unread else 0,
 		field = 2, #unread
