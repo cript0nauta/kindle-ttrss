@@ -101,21 +101,21 @@ def send(filename, verbose, kindlemail):
 
 def uso():
 		print "Uso: python %s [opciones] [out]" % sys.argv[0]
-		print "Si no se especifica out el nombre del fichero será (fecha).html"
+		print "Si no se especifica out el nombre del fichero será feeds.html"
 		print "Opciones:"
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
-		print "\t-m <mail>| --kindle-email=mail \t Se envía al mail del Kindle" 
+		#print "\t-m <mail>| --kindle-email=mail \t Se envía al mail del Kindle" 
 		print "\t-p | --pdf \t\t\t Genera un fichero resultante en PDF"
-		print "\t-r | --remember \t\t Mantener sesión iniciada"
-		print "\t --logout \t\t\t Cerrar la sesión iniciada con -r"
+		print "\t-m | --mobi \t\t\t Genera un fichero resultante en un .mobi"
+		print "\t --logout \t\t\t Cerrar la sesión iniciada"
 		exit()
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvm:pr', \
+		opts, args = getopt.getopt(sys.argv[1:], 'hvm:p', \
 				['help', 'verbose', 'kindle-email=', 'only-generate', 'pdf',
-				'remember', 'logout'])
+				'logout'])
 	except getopt.GetoptError:
 		uso()
 
@@ -123,7 +123,6 @@ if __name__ == '__main__':
 	kindlemail = None
 	enviar = False
 	pdf = False
-	remember = False
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
@@ -135,25 +134,21 @@ if __name__ == '__main__':
 			kindlemail = val
 		elif opt in ('-p', '--pdf'):
 			pdf = True
-		elif opt in ('-r', '--remember'):
-			remember = True
 	
 	if kindlemail is None and enviar:
 		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
 		kindlemail = username.split('@')[0]
 		kindlemail += '@kindle.com'
 
-	fecha = os.popen('date "+%F-%R"').read()[:-1]
 	if len(args):
 		filename = args[0]
 	else:
-		filename = fecha + '.html'
+		filename = 'feeds.html'
 
 	try:
 		f = open(LOGIN_FILE)
-		if remember: raise IOError # Si uso --remember siempre nos pide login
 	except IOError:
-		# No usamos la opción de mantener sesión iniciada
+		# No iniciamos sesión
 		url = raw_input('URL: ')
 		user = raw_input('User: ')
 		password = getpass('Password: ')
@@ -161,16 +156,15 @@ if __name__ == '__main__':
 		if not sid:
 			print 'Login fallido'
 			exit()
+		# Creamos un fichero con los datos de la sesión
+		f = open(LOGIN_FILE, 'w')
+		f.write(';'.join([sid,url]))
+		f.close()
 	else:
 		content = f.read()
 		sid, url = content.split(';', 1)
 		f.close()
 
-	if remember:
-		# Creamos un fichero con los datos de la sesión
-		f = open(LOGIN_FILE, 'w')
-		f.write(';'.join([sid,url]))
-		f.close()
 
 	if ('--logout','') in opts:
 		# Si indicamos la opción logout
