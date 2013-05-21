@@ -13,6 +13,7 @@ from email import Encoders
 import json
 from getpass import getpass
 import random
+import datetime
 
 XHTML2HTTP_EXEC = '/usr/bin/xhtml2pdf'
 LOGIN_FILE = 'login'
@@ -174,6 +175,7 @@ if __name__ == '__main__':
 			print "Error cerrando sesión. Saliendo"
 		exit()
 
+	fecha = datetime.datetime.today().ctime()
 	genhtml(fecha, url, sid, filename, verbose)
 
 	if pdf: genpdf(verbose, filename)
