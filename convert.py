@@ -10,7 +10,6 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email import Encoders
-import json
 from getpass import getpass
 import random
 import datetime
@@ -69,44 +68,12 @@ def genpdf(verbose, filename):
 	if verbose: print 'Guardando PDF en', pdf
 	os.system('%s "%s" "%s"' % (XHTML2HTTP_EXEC, filename, pdf))
 
-def mail(to, subject, text, attach):
-   msg = MIMEMultipart()
-
-   msg['From'] = username
-   msg['To'] = to
-   msg['Subject'] = subject
-
-   msg.attach(MIMEText(text))
-
-   part = MIMEBase('application', 'octet-stream')
-   part.set_payload(open(attach, 'rb').read())
-   Encoders.encode_base64(part)
-   part.add_header('Content-Disposition',
-           'attachment; filename="%s"' % os.path.basename(attach))
-   msg.attach(part)
-
-   mailServer = smtplib.SMTP("smtp.gmail.com", 587)
-   mailServer.ehlo()
-   mailServer.starttls()
-   mailServer.ehlo()
-   mailServer.login(username, password)
-   mailServer.sendmail(username, to, msg.as_string())
-   # Should be mailServer.quit(), but that crashes...
-   mailServer.close()
-
-def send(filename, verbose, kindlemail):
-	""" Enviamos el PDF a nuestro Kindle desde nuestro gmail """
-	if verbose: print 'Enviando a',kindlemail,'...',
-	mail(kindlemail, 'Convertir', '', filename)
-	if verbose: print 'Enviado'
-
 def uso():
 		print "Uso: python %s [opciones] [out]" % sys.argv[0]
 		print "Si no se especifica out el nombre del fichero será feeds.html"
 		print "Opciones:"
 		print "\t-h | --help \t\t\t Muestra este diálogo"
 		print "\t-v | --verbose \t\t\t Muestra información mientras se ejecuta"
-		#print "\t-m <mail>| --kindle-email=mail \t Se envía al mail del Kindle" 
 		print "\t-p | --pdf \t\t\t Genera un fichero resultante en PDF"
 		print "\t-m | --mobi \t\t\t Genera un fichero resultante en un .mobi"
 		print "\t --logout \t\t\t Cerrar la sesión iniciada"
@@ -114,33 +81,26 @@ def uso():
 
 if __name__ == '__main__':
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hvm:p', \
+		opts, args = getopt.getopt(sys.argv[1:], 'hvmp', \
 				['help', 'verbose', 'kindle-email=', 'only-generate', 'pdf',
-				'logout'])
+				'logout', 'mobi'])
 	except getopt.GetoptError:
 		uso()
 
 	verbose = True
-	kindlemail = None
-	enviar = False
 	pdf = False
+	mobi = False
 
 	for opt,val in opts:
 		if opt in ('-h','--help'):
 			uso()
 		elif opt in ('-v', '--verbose'):
 			verbose = True
-		elif opt in ('-m', '--kindle-email'):
-			enviar = True
-			kindlemail = val
 		elif opt in ('-p', '--pdf'):
 			pdf = True
+		elif opt in ('-m', '--mobi'):
+			mobi = True
 	
-	if kindlemail is None and enviar:
-		""" Si mi gmail es pepe@gmail.com el del kindle es pepe@kindle.com """
-		kindlemail = username.split('@')[0]
-		kindlemail += '@kindle.com'
-
 	if len(args):
 		filename = args[0]
 	else:
@@ -177,7 +137,10 @@ if __name__ == '__main__':
 
 	fecha = datetime.datetime.today().ctime()
 	genhtml(fecha, url, sid, filename, verbose)
+	if mobi:
+		if verbose: print('Generando el .mobi')
+		print  'kindlegen %s' % pipes.quote(filename)
+		os.system('kindlegen %s' % pipes.quote(filename))
 
 	if pdf: genpdf(verbose, filename)
-	if enviar: send(filename+'.pdf', verbose, kindlemail)
 
