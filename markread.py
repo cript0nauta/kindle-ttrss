@@ -1,60 +1,68 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import urllib
-try:
-  import json
-except ImportError:
-  import simplejson as json
+from get import *
+import sys, getopt
+import re
 
-def login(user, password, url):
-	""" Intenta loguearse en ttss. Retorna un SID si el login es
-	efectivo, de lo contrario retorna False """
-	j = dict(op='login', user=user, password=password)
-	j = json.dumps(j) # Lo convierte a un string en formato JSON
-	page = urllib.urlopen(url, j).read()
-	j = json.loads(page) # Cargamos el JSON que retornó TTRSS
-	if j['status'] == 1:
-		# Login fallido
-		return False
-	return j['content']['session_id']
+def uso():
+	print "Uso: python %s [opciones] <CLIPPINGS_FILE>" % sys.argv[0]
+	print "CLIPPINGS_FILE es el fichero Mis recortes.txt del Kindle"
+	print "Opciones:"
+	print "\t-v\tMuestra información útil mientras corre"
+	exit()
 
-def logout(url, sid):
-	""" Cierra la sesión especificada. Retorna True si no hay error """
-	j = dict(op='logout', sid=sid)
-	j = json.dumps(j)
-	page = urllib.urlopen(url,j).read()
-	ret = json.loads(page)
-	if not ret['status']:
-		return True
+def main(url, sid, filename, verbose = False):
+	if verbose: print 'Abriendo fichero de recortes'
+	recortes = open(filename).read()
+	separator = '\r\n==========\r\n'
+	clips = recortes.split(separator)[:-1] # El último elemento está en blanco
+	keepunread = [] 
+	invalidclips = [] 
+	for clip in clips:
+		content = clip.splitlines()[3]
+		match= re.match('__(UNREAD|READALL)__([0-9]+)', content)
+		if match:
+			action, id_ = match.groups()
+			if action == 'READALL':
+				dbname = 'db_%s' % id_
+				if verbose: print 'Abriendo', dbname
+				article_ids = open(dbname).read()
+				update(url, sid, False, article_ids)
+			elif action == 'UNREAD':
+				keepunread.append(id_)
+		else:
+			# Es un subrayado normal que no nos interesa
+			# Lo dejamos igual que antes
+			invalidclips.append(clip)
 
-def get(url, sid):
-	""" Obtiene los elementos sin leer en Tiny Tiny RSS"""
-	j = json.dumps(dict(sid=sid,op='getHeadlines', #obtiene artículos
-		feed_id=-3, #últimos sin leer
-		show_content=True))
-	page = urllib.urlopen(url, j).read()
-	j = json.loads(page)
-	if j['status'] == 1:
-		#Error
-		return False
-	return j['content']
+	if verbose: print 'Marcando como no leídos:', keepunread
+	if keepunread: update(url, sid, True, *keepunread)
 
-def update(url, sid, unread, articles):
-	""" Marca como leídos o no leídos los items indicados. articles 
-	debe ser una cadena de texto conteniendo los IDs de cada artículo
-	separados por coma"""
-	j = json.dumps(dict(op='updateArticle',
-		article_ids = articles,
-		sid = sid,
-		mode = 1 if unread else 0,
-		field = 2, #unread
-		))
-	page = urllib.urlopen(url, j).read()
-	j = json.loads(page)
-	if j['status'] == 1:
-		#Error
-		print j
-		raise ValueError
+	if verbose: print 'Escribiendo en', filename
+	f = open(filename, 'w')
+	f.write(separator.join(invalidclips) + separator)
+	f.close()
 
+if __name__ == '__main__':
+	verbose = False
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], 'v', [])
+	except getopt.getoptError:
+		uso()
+
+	for opt, val in opts:
+		if opt == '-v':
+			verbose = True
+
+	if not args:
+		uso()
+
+	filename = args[0]
+	if verbose: print 'Abriendo', filename
+	f = open('login')
+	content = f.read()
+	sid, url = content.split(';', 1)
+	f.close()
+	main(url, sid, filename, verbose)
 
