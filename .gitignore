@@ -3,7 +3,8 @@
 *~
 login
 *.html
-*.pdf
 !template.html
-db.json
+*.pdf
+*.mobi
 db_*
+images/*

@@ -2,14 +2,10 @@
 #-*- coding: utf-8 -*-
 
 from get import *
+from images import replace_images
 from markdown import markdown
 import os, sys, pipes
 import getopt
-import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email.MIMEText import MIMEText
-from email import Encoders
 from getpass import getpass
 import random
 import datetime
@@ -87,7 +83,7 @@ if __name__ == '__main__':
 	except getopt.GetoptError:
 		uso()
 
-	verbose = True
+	verbose = False
 	pdf = False
 	mobi = False
 
@@ -138,6 +134,9 @@ if __name__ == '__main__':
 	fecha = datetime.datetime.today().ctime()
 	genhtml(fecha, url, sid, filename, verbose)
 	if mobi:
+		if verbose: print('Descargando imágenes')
+		replace_images(filename, verbose)
+
 		if verbose: print('Generando el .mobi')
 		print  'kindlegen %s' % pipes.quote(filename)
 		os.system('kindlegen %s' % pipes.quote(filename))
