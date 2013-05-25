@@ -3,23 +3,25 @@ Tiny Tiny RSS en tu Kindle
 
 Basado en [kindle-greader](https://github.com/sh4r3m4n/kindle-greader)
 
+## Configurar TTRSS
+* Asegurarse de habilitar el API en las preferencias
+* La URL será http://mihost/path-a-tt-rss/api/
+
 ## Dependencias
-[Markdown](http://pypi.python.org/pypi/Markdown), [Libgreader](https://github.com/askedrelic/libgreader), [xhtml2pdf](https://github.com/askedrelic/libgreader)
+* [python-markdown](http://pypi.python.org/pypi/Markdown)
+* [xhtml2pdf](https://github.com/askedrelic/libgreader) (opcional, para convertir a PDF)
+* [kindlegen](http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211) (opcional, para convertir a mobi)
 
-## Configuración
+## Convertir los feeds a HTML y MOBI
 ```
-# Crear archivo con usuario y contraseña de Google
-echo "usuario:contraseña" > login
-```
-
-## Enviar artículos por mail a nuestro Kindle
-```
-python convert.py
+$ git clone git@github.com:sh4r3m4n/kindle-ttrss.git
+$ cd kindle-ttrss
+$ ./convert.py -m # Se genera un feeds.html y un feeds.mobi
 ```
 
-## Marcar como leídos los elementos que seleccionamos, según el subrayado
+## Marcar como leídos los elementos
 ```
-# Debemos tener conectado el Kindle
-# Suponemos que está montado en /mnt/kindle
-python markread.py /mnt/kindle
+$ # Se deben subrayar las palabras clave __UNREAD__XXX y __READALL__XXX en el kindle
+$ # Se supone que el Kindle está conectado y montado en /mnt/kindle
+$ ./markread.py "/mnt/kindle/documents/Mis recortes.txt" # Le paso como argumento el fichero con los subrayados
 ```
