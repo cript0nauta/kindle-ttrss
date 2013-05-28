@@ -20,7 +20,11 @@ def main(url, sid, filename, verbose = False):
 	keepunread = [] 
 	invalidclips = [] 
 	for clip in clips:
-		content = clip.splitlines()[3]
+		try:
+			content = clip.splitlines()[3]
+		except IndexError:
+			print 'Error de índice en el fichero, ignorando'
+			continue
 		match= re.match('__(UNREAD|READALL)__([0-9]+)', content)
 		if match:
 			action, id_ = match.groups()
