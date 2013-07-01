@@ -19,9 +19,6 @@ def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
 	template = open('template.html').read().decode('utf-8')
 	if verbose: print 'Obteniendo artículos'
 	articulos = get(url, sid)
-	if articulos == False:
-		print 'Login fallido'
-		exit()
 	html = ''
 	indice = ''
 
@@ -102,26 +99,7 @@ if __name__ == '__main__':
 	else:
 		filename = 'feeds.html'
 
-	try:
-		f = open(LOGIN_FILE)
-	except IOError:
-		# No iniciamos sesión
-		url = raw_input('URL: ')
-		user = raw_input('User: ')
-		password = getpass('Password: ')
-		sid = login(user, password, url)
-		if not sid:
-			print 'Login fallido'
-			exit()
-		# Creamos un fichero con los datos de la sesión
-		f = open(LOGIN_FILE, 'w')
-		f.write(';'.join([sid,url]))
-		f.close()
-	else:
-		content = f.read()
-		sid, url = content.split(';', 1)
-		f.close()
-
+	url, sid = login()
 
 	if ('--logout','') in opts:
 		# Si indicamos la opción logout
