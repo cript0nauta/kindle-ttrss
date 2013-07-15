@@ -19,6 +19,7 @@ def genhtml(fecha, url, sid, filename = 'out.html', verbose = False):
     template = open('template.html').read().decode('utf-8')
     if verbose: print 'Obteniendo artículos'
     articulos = get(url, sid, verbose)
+    articulos = reversed(articulos) # Ordeno del más viejo al más nuevo
     html = ''
     indice = ''
 
