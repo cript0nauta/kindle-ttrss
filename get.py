@@ -111,8 +111,8 @@ def get(url, sid, verbose = False):
 
 def update(url, sid, unread, articles):
     """ Marca como leídos o no leídos los items indicados. articles 
-    debe ser una cadena de texto conteniendo los IDs de cada artículo
-    separados por coma"""
+    debe ser una lista conteniendo los IDs de cada artículo """
+    articles = ','.join([str(a) for a in articles])
     j = json.dumps(dict(op='updateArticle',
     	article_ids = articles,
     	sid = sid,
