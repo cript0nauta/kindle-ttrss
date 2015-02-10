@@ -4,7 +4,7 @@ Tiny Tiny RSS en tu Kindle
 Basado en [kindle-greader](https://github.com/sh4r3m4n/kindle-greader)
 
 ## Configurar TTRSS
-* Asegurarse de habilitar el API en las preferencias
+* Asegurarse de habilitar el API en las preferencias de tt-rss
 * La URL será http://mihost/path-a-tt-rss/api/
 
 ## Dependencias
